@@ -1,0 +1,129 @@
+<!doctype html>
+<html>
+
+<head>
+    <title>Radar Chart</title>
+    <link href="/chartjs-select2-multiple/node_modules/bootstrap/dist/css/bootstrap.min.css" type="text/css" rel="stylesheet" />
+    <link href="/chartjs-select2-multiple/node_modules/select2/dist/css/select2.min.css" type="text/css" rel="stylesheet" />
+</head>
+
+<style>
+    #radar-legent .filter-route {
+        width: 100%;
+    }
+</style>
+
+<body>
+    <div class="container">
+      <div class="row">
+      <div class="col-md-12">
+          <h3>Time request routes (seconds)</h3>
+      </div>
+          <div class="col-md-12">
+            <h5>Filter by path:</h5>
+              <div id="radar-legent"></div>
+          </div>
+          <div class="col-md-12">
+              <canvas id="canvas"></canvas>
+          </div>
+      </div>
+    </div>
+
+
+
+
+    <script src="/chartjs-select2-multiple/node_modules/chart.js/dist/Chart.bundle.min.js"></script>
+    <script src="/chartjs-select2-multiple/node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="/chartjs-select2-multiple/node_modules/select2/dist/js/select2.full.min.js"></script>
+    
+    <script>
+    var config = {
+        type: 'radar',
+        data: {
+            labels: ["Total", "Controller", "Collections", "Datasource"],
+            datasets: [
+                {
+                    label: "POST /users/create",
+                    backgroundColor: "rgba(0,255,0,0.4)",
+                    pointBackgroundColor: "rgba(0,255,0,1)",
+                    data: [0.9, 0.01, 0.5, 0.4],
+                    hide: true
+                }, {
+                    label: "GET /users",
+                    backgroundColor: "rgba(255,0,0,0.4)",
+                    pointBackgroundColor: "rgba(255,0,0,1)",
+                    pointHoverBackgroundColor: "#fff",
+                    data: [1.1, 0.3, 0.4, 0.4]
+                }, {
+                    label: "GET /logs",
+                    backgroundColor: "rgba(255,0,0,0.4)",
+                    pointBackgroundColor: "rgba(255,0,0,1)",
+                    pointHoverBackgroundColor: "#fff",
+                    data: [1.9, 0.8, 0.4, 0.7]
+                }
+            ]
+        },
+        options: {
+            legendCallback: function(chart){
+                var text = [];
+                text.push('<select class="' + chart.id + '-legend filter-route" multiple="multiple">');
+
+                var data = chart.data;
+                var datasets = data.datasets;
+                var labels = data.labels;
+                    for (i in datasets) {
+                        text.push('<option value="' + i + '">');
+                        text.push(datasets[i].label);
+                        text.push('</option>');
+                    }
+
+                text.push('</ul>');
+                return text.join('');
+            },
+            legend: {
+                display: false
+            },
+            title: {
+                display: false
+            },
+            scale: {
+              reverse: false,
+              gridLines: {
+                color: ['green', 'yellow', 'orange', 'red']
+              },
+              ticks: {
+                beginAtZero: true
+              }
+            }
+        }
+    };
+    window.onload = function() {
+        window.myRadar = new Chart(document.getElementById("canvas"), config);
+        document.getElementById('radar-legent').innerHTML = window.myRadar.generateLegend();
+        $(".filter-route").select2();
+        $('.filter-route').on('change', function(event){
+            event.preventDefault();
+            var value = $(this).val();
+            if(value.length > 0){
+                for(i in config.data.datasets){
+                    config.data.datasets[i].hidden = true;
+                }
+                for(i in value){
+                    config.data.datasets[value[i]].hidden = false;
+                }
+            }else{
+                for(i in config.data.datasets){
+                    config.data.datasets[i].hidden = false;
+                }
+            }
+            window.myRadar.destroy();
+            window.myRadar = new Chart(document.getElementById("canvas"), config);
+        });
+    };
+    </script>
+    <script type="text/javascript">
+    
+</script>
+</body>
+
+</html>
